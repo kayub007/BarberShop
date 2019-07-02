@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.barbershop.Adapter.HomeSliderAdapter;
 import com.example.barbershop.Adapter.LookbookAdapter;
 import com.example.barbershop.BookingActivity;
+import com.example.barbershop.CartActivity;
 import com.example.barbershop.Common.Common;
 import com.example.barbershop.Database.CartDatabase;
 import com.example.barbershop.Database.DatabaseUtils;
@@ -97,14 +98,12 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     TextView txt_time_remain;
 
     @OnClick(R.id.btn_delete_booking)
-    void deleteBooking()
-    {
+    void deleteBooking() {
         deleteBookingFromBarber(false);
     }
 
     @OnClick(R.id.btn_change_booking)
-    void changeBooking()
-    {
+    void changeBooking() {
         changeBookingFromUser();
     }
 
@@ -130,12 +129,11 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
 
     private void deleteBookingFromBarber(final boolean isChange) {
         /* To delet booking first, we need delete from barber collection
-        * After that we will delete from user booking collection
-        * And final , delete event */
+         * After that we will delete from user booking collection
+         * And final , delete event */
 
         //We need load Common.currentBooking because we need some data from bookingInformation
-        if (Common.currentBooking != null)
-        {
+        if (Common.currentBooking != null) {
             dialog.show();
             //Get booking information in barber object
             DocumentReference barberBookingInfo = FirebaseFirestore.getInstance()
@@ -162,17 +160,14 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     deleteBookingFromUser(isChange);
                 }
             });
-        }
-        else 
-        {
+        } else {
             Toast.makeText(getContext(), "Current Booking must not be null", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void deleteBookingFromUser(final boolean isChange) {
         //First, we need get information from user object
-        if (!TextUtils.isEmpty(Common.currentBookingId))
-        {
+        if (!TextUtils.isEmpty(Common.currentBookingId)) {
             DocumentReference userBookingInfo = FirebaseFirestore.getInstance()
                     .collection("User")
                     .document(Common.currentUser.getPhoneNumber())
@@ -192,7 +187,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     //First, we need get save Uri of event we just add
                     Paper.init(getActivity());
                     Uri eventUri = Uri.parse(Paper.book().read(Common.EVENT_URI_CACHE).toString());
-                    getActivity().getContentResolver().delete(eventUri,null,null);
+                    getActivity().getContentResolver().delete(eventUri, null, null);
 
                     Toast.makeText(getActivity(), "Success deleting Booking !", Toast.LENGTH_SHORT).show();
 
@@ -207,18 +202,20 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     dialog.dismiss();
                 }
             });
-        }
-        else
-        {
+        } else {
             dialog.dismiss();
             Toast.makeText(getContext(), "Booking information ID must not be empty", Toast.LENGTH_SHORT).show();
         }
     }
 
     @OnClick(R.id.card_view_booking)
-    void booking()
-    {
+    void booking() {
         startActivity(new Intent(getActivity(), BookingActivity.class));
+    }
+
+    @OnClick(R.id.card_view_cart)
+    void openCartActivity() {
+        startActivity(new Intent(getActivity(), CartActivity.class));
     }
 
     //FireStore
@@ -234,7 +231,6 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     public HomeFragment() {
         bannerRef = FirebaseFirestore.getInstance().collection("Banner");
         lookbookRef = FirebaseFirestore.getInstance().collection("Lookbook");
-
 
 
     }
@@ -263,7 +259,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
 
         // Select booking information from Firebase with done = false and timestamp > today
         userBooking
-                .whereGreaterThanOrEqualTo("timestamp",toDayTimeStamp)
+                .whereGreaterThanOrEqualTo("timestamp", toDayTimeStamp)
                 .whereEqualTo("done", false)
                 .limit(1) //Only take 1
                 .get()
@@ -271,18 +267,14 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                        if (task.isSuccessful())
-                        {
-                            if (!task.getResult().isEmpty())
-                            {
-                                for (QueryDocumentSnapshot queryDocumentSnapshot:task.getResult())
-                                {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                                     BookingInformation bookingInformation = queryDocumentSnapshot.toObject(BookingInformation.class);
-                                    iBookingInfoLoadListener.onBookingInfoLoadSuccess(bookingInformation,queryDocumentSnapshot.getId());
+                                    iBookingInfoLoadListener.onBookingInfoLoadSuccess(bookingInformation, queryDocumentSnapshot.getId());
                                     break; // Exit loop as soon as
                                 }
-                            }
-                            else
+                            } else
                                 iBookingInfoLoadListener.onBookingInfoLoadEmpty();
                         }
 
@@ -319,8 +311,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
         iBookingInformationChangeListener = this;
 
         // Check is Logged ?
-        if (AccountKit.getCurrentAccessToken() != null)
-        {
+        if (AccountKit.getCurrentAccessToken() != null) {
             setUserInformation();
             loadBanner();
             loadLookbook();
@@ -332,7 +323,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     }
 
     private void countCartItem() {
-        DatabaseUtils.countItemInCart(cartDatabase,this);
+        DatabaseUtils.countItemInCart(cartDatabase, this);
     }
 
     private void loadLookbook() {
@@ -341,10 +332,8 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         List<Banner> lookbooks = new ArrayList<>();
-                        if (task.isSuccessful())
-                        {
-                            for (QueryDocumentSnapshot bannerSnapShot:task.getResult())
-                            {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot bannerSnapShot : task.getResult()) {
                                 Banner banner = bannerSnapShot.toObject(Banner.class);
                                 lookbooks.add(banner);
                             }
@@ -365,10 +354,8 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         List<Banner> banners = new ArrayList<>();
-                        if (task.isSuccessful())
-                        {
-                            for (QueryDocumentSnapshot bannerSnapShot:task.getResult())
-                            {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot bannerSnapShot : task.getResult()) {
                                 Banner banner = bannerSnapShot.toObject(Banner.class);
                                 banners.add(banner);
                             }
@@ -416,7 +403,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     }
 
     @Override
-    public void onBookingInfoLoadSuccess(BookingInformation bookingInformation,String bookingId) {
+    public void onBookingInfoLoadSuccess(BookingInformation bookingInformation, String bookingId) {
 
         Common.currentBooking = bookingInformation;
         Common.currentBookingId = bookingId;

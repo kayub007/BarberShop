@@ -38,7 +38,6 @@ public class HomeActivity extends AppCompatActivity {
 
     @BindView(R.id.bottom_navigation)
     BottomNavigationView bottomNavigationView;
-
     BottomSheetDialog bottomSheetDialog;
 
     CollectionReference userRef;
@@ -119,8 +118,6 @@ public class HomeActivity extends AppCompatActivity {
                 return loadFragment(fragment);
             }
         });
-
-
 
     }
 
